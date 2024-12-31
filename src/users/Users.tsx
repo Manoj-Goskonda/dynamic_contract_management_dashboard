@@ -7,23 +7,27 @@ import { UsersActionDialog } from "./components/users-action-dialog";
 import { columns } from "./components/users-columns";
 import { UsersDeleteDialog } from "./components/users-delete-dialog";
 import { UsersTable } from "./components/users-table";
+import { Header } from '@/components/layout/header'
+import { ThemeSwitch } from '@/components/theme-switch'
 import UsersContextProvider, {
   type UsersDialogType,
 } from "./context/users-context";
-import { User, userListSchema } from "./data/schema";
-import { users } from "./data/users";
+import { User } from "./data/schema";
 
 export default function Users() {
 
   const [currentRow, setCurrentRow] = useState<User | null>(null);
   const [open, setOpen] = useDialogState<UsersDialogType>(null);
 
-  const userList = userListSchema.parse(users);
-
   return (
     <UsersContextProvider value={{ open, setOpen, currentRow, setCurrentRow }}>
+      <Header>
+        <div className='ml-auto flex items-center space-x-4'>
+          <ThemeSwitch />
+        </div>
+      </Header>
       <Main>
-        <h1 className="text-4xl font-bold">Dynamic Contract Management Dashboard</h1>
+        <h1 className="text-4xl font-bold"> Dynamic Contract Management Dashboard </h1>
         <br />
         <div className="mb-2 flex items-center justify-between space-y-2 flex-wrap">
           <div>
@@ -39,7 +43,7 @@ export default function Users() {
           </div>
         </div>
         <div className="-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-x-12 lg:space-y-0">
-          <UsersTable data={userList} columns={columns} />
+          <UsersTable columns={columns} />
         </div>
       </Main>
 

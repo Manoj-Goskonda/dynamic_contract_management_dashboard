@@ -50,6 +50,30 @@ interface Props {
   onOpenChange: (open: boolean) => void
 }
 
+const apiUrl = 'https://6773f19b77a26d4701c6cb32.mockapi.io/users'
+
+async function addUser(userData: UserForm) {
+  const response = await fetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(userData),
+  })
+  return response.json()
+}
+
+async function updateUser(id: string, userData: UserForm) {
+  const response = await fetch(`${apiUrl}/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(userData),
+  })
+  return response.json()
+}
+
 export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
   const isEdit = !!currentRow
   const form = useForm<UserForm>({
@@ -71,16 +95,30 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
       },
   })
 
-  const onSubmit = (values: UserForm) => {
+  const onSubmit = async (values: UserForm) => {
+    try {
+      if (isEdit) {
+        await updateUser(currentRow?.id || '', values)
+        toast({
+          title: 'User updated successfully!',
+          description: <pre>{JSON.stringify(values, null, 2)}</pre>,
+        })
+      } else {
+        await addUser(values)
+        toast({
+          title: 'New user added successfully!',
+          description: <pre>{JSON.stringify(values, null, 2)}</pre>,
+        })
+
+      }
+    } catch (error) {
+      toast({
+        title: `Error! ${error}`,
+        description: 'There was an issue submitting your data.',
+      })
+    }
+
     form.reset()
-    toast({
-      title: 'You submitted the following values:',
-      description: (
-        <pre className='mt-2 w-[340px] rounded-md bg-slate-950 p-4'>
-          <code className='text-white'>{JSON.stringify(values, null, 2)}</code>
-        </pre>
-      ),
-    })
     onOpenChange(false)
   }
 
@@ -94,10 +132,9 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
     >
       <DialogContent className='sm:max-w-lg'>
         <DialogHeader className='text-left'>
-          <DialogTitle>{isEdit ? 'Edit User' : 'Add New Contract'}</DialogTitle>
+          <DialogTitle>{isEdit ? 'Edit User' : 'Add New User'}</DialogTitle>
           <DialogDescription>
-            {isEdit ? 'Update the client here. ' : 'Create new client here. '}
-            Click save when you&apos;re done.
+            {isEdit ? 'Update the user details here.' : 'Create a new user.'}
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className='h-[26.25rem] w-full pr-4 -mr-4 py-1'>
@@ -217,10 +254,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
                       onValueChange={field.onChange}
                       placeholder='Select a role'
                       className='col-span-4'
-                      items={userTypes.map(({ label, value }) => ({
-                        label,
-                        value,
-                      }))}
+                      items={userTypes.map(({ label, value }) => ({ label, value }))}
                     />
                     <FormMessage className='col-span-4 col-start-3' />
                   </FormItem>
@@ -237,12 +271,9 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
                     <SelectDropdown
                       defaultValue={field.value}
                       onValueChange={field.onChange}
-                      placeholder='Select a Status'
+                      placeholder='Select Status'
                       className='col-span-4'
-                      items={callTypes.map(({ label, value }) => ({
-                        label,
-                        value
-                      }))}
+                      items={callTypes.map(({ label, value }) => ({ label, value }))}
                     />
                     <FormMessage className='col-span-4 col-start-3' />
                   </FormItem>

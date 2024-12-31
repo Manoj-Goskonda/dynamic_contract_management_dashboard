@@ -3,47 +3,46 @@ import {
   IconShield,
   IconUsersGroup,
   IconUserShield,
-} from '@tabler/icons-react'
+} from "@tabler/icons-react";
 
 export const callTypes = [
   {
-    label: 'Active',
-    value: 'active',
-
+    label: "Active",
+    value: "active",
   },
   {
-    label: 'Inactive',
-    value: 'inactive',
+    label: "Inactive",
+    value: "inactive",
   },
   {
-    label: 'Invited',
-    value: 'invited',
+    label: "Invited",
+    value: "invited",
   },
   {
-    label: 'Suspended',
-    value: 'suspended',
+    label: "Suspended",
+    value: "suspended",
   },
-  ] as const
+] as const;
 
 export const userTypes = [
   {
-    label: 'Superadmin',
-    value: 'superadmin',
+    label: "Superadmin",
+    value: "superadmin",
     icon: IconShield,
   },
   {
-    label: 'Admin',
-    value: 'admin',
+    label: "Admin",
+    value: "admin",
     icon: IconUserShield,
   },
   {
-    label: 'Manager',
-    value: 'manager',
+    label: "Manager",
+    value: "manager",
     icon: IconUsersGroup,
   },
   {
-    label: 'Cashier',
-    value: 'cashier',
+    label: "Cashier",
+    value: "cashier",
     icon: IconCash,
   },
-] as const
+] as const;

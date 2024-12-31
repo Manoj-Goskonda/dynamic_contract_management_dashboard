@@ -1,4 +1,6 @@
-import { useState } from 'react'
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-console */
+import { useEffect, useState } from 'react'
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -7,8 +9,6 @@ import {
   VisibilityState,
   flexRender,
   getCoreRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
@@ -22,12 +22,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { User } from '../data/schema'
 import { DataTablePagination } from './data-table-pagination'
 import { DataTableToolbar } from './data-table-toolbar'
+import { User } from '../data/schema'
+
+const apiUrl = 'https://6773f19b77a26d4701c6cb32.mockapi.io/users'
 
 declare module '@tanstack/react-table' {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ColumnMeta<TData extends RowData, TValue> {
     className: string
   }
@@ -35,14 +36,28 @@ declare module '@tanstack/react-table' {
 
 interface DataTableProps {
   columns: ColumnDef<User>[]
-  data: User[]
 }
 
-export function UsersTable({ columns, data }: DataTableProps) {
+export function UsersTable({ columns }: DataTableProps) {
+  const [data, setData] = useState<User[]>([])
   const [rowSelection, setRowSelection] = useState({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [sorting, setSorting] = useState<SortingState>([])
+
+  // Fetch data from MockAPI
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(apiUrl)
+        const users = await response.json()
+        setData(users)
+      } catch (error) {
+        console.error('Error fetching users data:', error)
+      }
+    }
+    fetchData()
+  }, [])
 
   const table = useReactTable({
     data,
@@ -62,8 +77,6 @@ export function UsersTable({ columns, data }: DataTableProps) {
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
   })
 
   return (
@@ -74,22 +87,20 @@ export function UsersTable({ columns, data }: DataTableProps) {
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className='group/row'>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead
-                      key={header.id}
-                      colSpan={header.colSpan}
-                      className={header.column.columnDef.meta?.className ?? ''}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  )
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead
+                    key={header.id}
+                    colSpan={header.colSpan}
+                    className={header.column.columnDef.meta?.className ?? ''}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
@@ -106,20 +117,14 @@ export function UsersTable({ columns, data }: DataTableProps) {
                       key={cell.id}
                       className={cell.column.columnDef.meta?.className ?? ''}
                     >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className='h-24 text-center'
-                >
+                <TableCell colSpan={columns.length} className='h-24 text-center'>
                   No results.
                 </TableCell>
               </TableRow>
