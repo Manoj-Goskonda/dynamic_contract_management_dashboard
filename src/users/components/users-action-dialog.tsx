@@ -1,5 +1,6 @@
-'use client'
+// 'use client';
 
+import { useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -95,35 +96,47 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
       },
   })
 
+  const [users, setUsers] = useState<User[]>([]);
+
   const onSubmit = async (values: UserForm) => {
     try {
-      if (isEdit) {
-        await updateUser(currentRow?.id || '', values)
+      if (values.isEdit) {
+        // Update user
+        const updatedUser = await updateUser(currentRow?.id || '', values);
+        setUsers((prev) =>
+          prev.map((user) =>
+            user.id === currentRow?.id ? { ...user, ...updatedUser } : user
+          )
+        );
         toast({
           title: 'User updated successfully!',
-          description: <pre>{JSON.stringify(values, null, 2)}</pre>,
-        })
+          description: <pre>{JSON.stringify(updatedUser, null, 2)}</pre>,
+        });
       } else {
-        await addUser(values)
+        // Add new user
+        const newUser = await addUser(values);
+        setUsers((prev) => [...prev, newUser]);
         toast({
           title: 'New user added successfully!',
-          description: <pre>{JSON.stringify(values, null, 2)}</pre>,
-        })
-
+          description: <pre>{JSON.stringify(newUser, null, 2)}</pre>,
+        });
       }
     } catch (error) {
       toast({
-        title: `Error! ${error}`,
+        title: `${error}!`,
         description: 'There was an issue submitting your data.',
-      })
+      });
     }
 
-    form.reset()
-    onOpenChange(false)
-  }
+    // Reset form and close dialog
+    form.reset();
+    onOpenChange(false);
+    console.log('Submitted data:', values);
+    console.log('Users data:', users);
+  };
 
   return (
-    <Dialog
+    < Dialog
       open={open}
       onOpenChange={(state) => {
         form.reset()
@@ -156,7 +169,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
                       <Input
                         placeholder='John'
                         className='col-span-4'
-                        autoComplete='off'
+                        autoComplete='on'
                         {...field}
                       />
                     </FormControl>
@@ -176,7 +189,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
                       <Input
                         placeholder='Doe'
                         className='col-span-4'
-                        autoComplete='off'
+                        autoComplete='on'
                         {...field}
                       />
                     </FormControl>
@@ -288,6 +301,6 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: Props) {
           </Button>
         </DialogFooter>
       </DialogContent>
-    </Dialog>
+    </Dialog >
   )
 }

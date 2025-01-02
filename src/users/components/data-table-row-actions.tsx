@@ -21,7 +21,7 @@ interface DataTableRowActionsProps {
 }
 
 export function DataTableRowActions({ row }: DataTableRowActionsProps) {
-  const { setOpen, setCurrentRow } = useUsersContext()
+  const { setUsers, setOpen, setCurrentRow } = useUsersContext();
 
   const editUser = async (userId: string, updatedData: Partial<User>) => {
     try {
@@ -31,28 +31,41 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(updatedData),
-      })
-      const result = await response.json()
-      console.log('User updated:', result)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update user');
+      }
+
+      const updatedUser = await response.json();
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.id === userId ? { ...user, ...updatedUser } : user
+        )
+      );
+
+      console.log('User updated:', updatedUser);
     } catch (error) {
-      console.error('Error updating user:', error)
+      console.error('Error updating user:', error);
     }
-  }
+  };
 
   const deleteUser = async (userId: string) => {
     try {
       const response = await fetch(`${apiUrl}/${userId}`, {
         method: 'DELETE',
-      })
-      if (response.ok) {
-        console.log('User deleted successfully')
-      } else {
-        console.error('Error deleting user')
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete user');
       }
+      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
+
+      console.log('User deleted successfully');
     } catch (error) {
-      console.error('Error deleting user:', error)
+      console.error('Error deleting user:', error);
     }
-  }
+  };
 
   return (
     <DropdownMenu modal={false}>
@@ -70,7 +83,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
           onClick={() => {
             setCurrentRow(row.original)
             setOpen('edit')
-            editUser(row.original.id, { firstName: 'New Name' })
+            editUser(row.original.id, row.original)
           }}
         >
           Edit

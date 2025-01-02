@@ -15,12 +15,12 @@ import UsersContextProvider, {
 import { User } from "./data/schema";
 
 export default function Users() {
-
+  const [users, setUsers] = useState<User[]>([]);
   const [currentRow, setCurrentRow] = useState<User | null>(null);
   const [open, setOpen] = useDialogState<UsersDialogType>(null);
 
   return (
-    <UsersContextProvider value={{ open, setOpen, currentRow, setCurrentRow }}>
+    <UsersContextProvider value={{ open, setOpen, users, setUsers, currentRow, setCurrentRow }}>
       <Header>
         <div className='ml-auto flex items-center space-x-4'>
           <ThemeSwitch />
